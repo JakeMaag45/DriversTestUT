@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Utah Permit Cram</title>
+<style>
+:root{
+  --asphalt:#1c1e21;
+  --asphalt-2:#26292d;
+  --sign-green:#14653c;
+  --sign-green-dk:#0e4a2c;
+  --sign-yellow:#f2c230;
+  --work-orange:#d9631a;
+  --paint:#eceae5;
+  --paint-dim:#9ea3a8;
+  --right:#3fa96a;
+  --wrong:#d94f45;
+  --edge:rgba(236,234,229,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--asphalt);
+  color:var(--paint);
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:17px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:22px 18px 80px}
+
+/* ---------- guide sign hero ---------- */
+.sign{
+  background:var(--sign-green);
+  border:3px solid #fff;
+  border-radius:12px;
+  padding:20px 22px 18px;
+  box-shadow:0 0 0 4px var(--sign-green);
+}
+.sign h1{
+  margin:0;
+  font-size:clamp(30px,7vw,48px);
+  font-weight:800;
+  letter-spacing:-.02em;
+  text-transform:uppercase;
+  line-height:.95;
+}
+.sign p{margin:10px 0 0;font-size:15px;color:#d7ece0;max-width:52ch}
+.mile{
+  display:inline-block;margin-top:14px;padding:3px 10px;
+  border:2px solid var(--sign-yellow);border-radius:4px;
+  color:var(--sign-yellow);font-weight:700;font-size:13px;letter-spacing:.04em;
+}
+
+/* ---------- lane divider ---------- */
+.lane{
+  height:6px;margin:26px 0 22px;border-radius:3px;
+  background:repeating-linear-gradient(90deg,var(--paint) 0 34px,transparent 34px 60px);
+  opacity:.35;
+}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+.tab{
+  flex:1 1 160px;background:var(--asphalt-2);color:var(--paint);
+  border:2px solid var(--edge);border-radius:8px;
+  padding:12px 14px;font-size:16px;font-weight:700;cursor:pointer;
+  font-family:inherit;text-align:left;
+}
+.tab[aria-selected="true"]{background:var(--sign-yellow);color:#1c1e21;border-color:var(--sign-yellow)}
+.tab:focus-visible,button:focus-visible{outline:3px solid var(--sign-yellow);outline-offset:2px}
+
+/* ---------- buttons ---------- */
+button{font-family:inherit}
+.btn{
+  background:var(--sign-yellow);color:#1c1e21;border:none;border-radius:8px;
+  padding:13px 20px;font-size:16px;font-weight:800;cursor:pointer;
+}
+.btn:hover{background:#ffd54a}
+.btn-ghost{
+  background:transparent;color:var(--paint);border:2px solid var(--edge);
+  border-radius:8px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;
+}
+.btn-ghost:hover{border-color:var(--paint)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+/* ---------- setup ---------- */
+.setup h2{font-size:22px;margin:0 0 6px}
+.setup p{color:var(--paint-dim);margin:0 0 20px}
+.lengths{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.len{
+  background:var(--asphalt-2);border:2px solid var(--edge);border-radius:8px;
+  color:var(--paint);padding:14px 18px;font-weight:800;font-size:16px;cursor:pointer;
+}
+.len[aria-pressed="true"]{border-color:var(--sign-yellow);color:var(--sign-yellow)}
+.len small{display:block;font-weight:400;font-size:12px;color:var(--paint-dim);margin-top:2px}
+
+/* ---------- quiz ---------- */
+.meter{height:5px;background:rgba(236,234,229,.12);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.meter i{display:block;height:100%;background:var(--sign-yellow);width:0;transition:width .25s}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--paint-dim);margin-bottom:20px}
+.panel{
+  background:var(--asphalt-2);border:2px solid var(--edge);border-radius:10px;padding:22px;
+}
+.q{font-size:20px;font-weight:700;line-height:1.35;margin:0 0 18px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;
+  background:#1c1e21;color:var(--paint);border:2px solid var(--edge);
+  border-radius:8px;padding:13px 15px;font-size:16px;cursor:pointer;line-height:1.4;
+}
+.opt:hover:not(:disabled){border-color:var(--paint-dim)}
+.opt b{
+  flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:rgba(236,234,229,.14);
+  display:grid;place-items:center;font-size:13px;font-weight:800;
+}
+.opt.correct{border-color:var(--right);background:rgba(63,169,106,.14)}
+.opt.correct b{background:var(--right);color:#0d1a12}
+.opt.chosen-wrong{border-color:var(--wrong);background:rgba(217,79,69,.14)}
+.opt.chosen-wrong b{background:var(--wrong);color:#fff}
+.opt:disabled{cursor:default;opacity:.92}
+.feedback{margin-top:18px;padding:15px 16px;border-radius:8px;border-left:5px solid var(--sign-yellow);background:rgba(242,194,48,.09);font-size:15px}
+.feedback strong{display:block;margin-bottom:3px}
+.hintbtn{background:none;border:none;color:var(--sign-yellow);font-size:14px;font-weight:700;cursor:pointer;padding:10px 0 0;text-decoration:underline}
+.hint{font-size:14px;color:var(--paint-dim);padding-top:8px;font-style:italic}
+
+/* ---------- results ---------- */
+.score{text-align:center;padding:14px 0 4px}
+.score .num{font-size:72px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.score .verdict{font-size:20px;font-weight:700;margin-top:8px}
+.pass{color:var(--right)}.fail{color:var(--work-orange)}
+.score .sub{color:var(--paint-dim);font-size:15px;margin-top:6px}
+.missed{margin-top:26px}
+.missed h3{font-size:15px;color:var(--paint-dim);font-weight:700;margin:0 0 12px}
+.miss{border-left:4px solid var(--wrong);padding:2px 0 2px 14px;margin-bottom:16px}
+.miss p{margin:0 0 4px;font-weight:700}
+.miss span{font-size:15px;color:var(--paint-dim)}
+.miss span em{color:var(--right);font-style:normal;font-weight:700}
+
+/* ---------- flashcards on screen ---------- */
+.fc-intro{color:var(--paint-dim);margin:0 0 18px}
+.deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.card{
+  background:var(--asphalt-2);border:2px solid var(--edge);border-radius:10px;
+  padding:16px;min-height:120px;cursor:pointer;color:var(--paint);
+  font-size:15px;text-align:left;font-family:inherit;line-height:1.4;
+}
+.card:hover{border-color:var(--paint-dim)}
+.card .front{font-weight:700}
+.card .back{color:var(--sign-yellow);margin-top:10px;font-weight:600}
+.card[data-flipped="false"] .back{display:none}
+.card .tap{display:block;margin-top:10px;font-size:12px;color:var(--paint-dim);font-weight:400}
+.card[data-flipped="true"] .tap{display:none}
+
+/* ---------- print sheet ---------- */
+.print-only{display:none}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .wrap{max-width:none;padding:0}
+  .no-print{display:none !important}
+  .print-only{display:block}
+  .pcard{
+    display:flex;border:1px dashed #999;break-inside:avoid;page-break-inside:avoid;
+    height:2.35in;margin-bottom:.12in;
+  }
+  .pcard div{padding:.18in .22in;width:50%;display:flex;align-items:center}
+  .pcard .pq{border-right:1px dashed #999;font-weight:700;font-size:11.5pt}
+  .pcard .pa{font-size:11pt}
+  .pnote{font-size:9.5pt;margin:0 0 .2in;color:#444}
+  h2.ptitle{font-size:15pt;margin:0 0 .06in}
+  @page{margin:.5in}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="no-print">
+    <header class="sign">
+      <h1>Utah Permit<br>Cram</h1>
+      <p>Randomized practice test and flashcards for the Utah Driver License Division knowledge test. 50 questions on the real thing, 40 correct to pass.</p>
+      <span class="mile">EXIT — DLD 1 MI</span>
+    </header>
+
+    <div class="lane"></div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-quiz" aria-selected="true" onclick="showTab('quiz')">Practice test<br><small style="font-weight:400;color:inherit;opacity:.75">New order every time</small></button>
+      <button class="tab" role="tab" id="tab-cards" aria-selected="false" onclick="showTab('cards')">Flashcards<br><small style="font-weight:400;color:inherit;opacity:.75">Study + print</small></button>
+    </div>
+
+    <!-- QUIZ -->
+    <section id="view-quiz">
+      <div id="setup" class="setup">
+        <h2>How many questions?</h2>
+        <p>Questions and answer choices are shuffled every single time, so retaking it is never the same test twice.</p>
+        <div class="lengths" id="lengths"></div>
+        <div class="btn-row"><button class="btn" onclick="startQuiz()">Start test</button></div>
+      </div>
+
+      <div id="quiz" hidden>
+        <div class="meter"><i id="bar"></i></div>
+        <div class="meta"><span id="counter"></span><span id="running"></span></div>
+        <div class="panel">
+          <p class="q" id="qtext"></p>
+          <div class="opts" id="opts"></div>
+          <button class="hintbtn" id="hintbtn" onclick="showHint()">Show hint</button>
+          <div class="hint" id="hinttext" hidden></div>
+          <div class="feedback" id="feedback" hidden></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="next" hidden onclick="nextQ()">Next</button>
+          <button class="btn-ghost" onclick="reset()">Quit</button>
+        </div>
+      </div>
+
+      <div id="results" hidden>
+        <div class="panel">
+          <div class="score">
+            <div class="num" id="pct"></div>
+            <div class="verdict" id="verdict"></div>
+            <div class="sub" id="subline"></div>
+          </div>
+          <div class="missed" id="missed"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="startQuiz()">New random test</button>
+          <button class="btn-ghost" id="retryMissed" onclick="retryMissed()">Retry only what I missed</button>
+          <button class="btn-ghost" onclick="reset()">Change length</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FLASHCARDS -->
+    <section id="view-cards" hidden>
+      <p class="fc-intro">Tap a card to flip it. To print a cut-and-fold set, hit print — each card prints with the question on the left and the answer on the right, so you fold down the middle and cut along the dashes.</p>
+      <div class="btn-row" style="margin:0 0 20px">
+        <button class="btn" onclick="window.print()">Print flashcards</button>
+        <button class="btn-ghost" onclick="shuffleDeck()">Shuffle deck</button>
+        <button class="btn-ghost" onclick="flipAll()">Flip all</button>
+      </div>
+      <div class="deck" id="deck"></div>
+    </section>
+  </div>
+
+  <!-- printed output -->
+  <div class="print-only" id="printSheet"></div>
+</div>
+
+<script>
+/* ============ QUESTION BANK ============ */
+const BANK = [
+ {q:"You reach a four-way stop at the same moment as a car on your right. Who goes first?",a:"The car on your right",w:["You do, since you're on their left","Whoever signals first","The larger vehicle"],e:"Same time at a four-way stop means the driver on the right has the right of way. Arrive first, go first.",h:"Yield to the right."},
+ {q:"A school bus stops ahead of you with red lights flashing on an undivided road. What must you do?",a:"Stop at least 20 feet away, in both directions, until the lights go off",w:["Slow to 20 mph and pass carefully","Stop only if you're behind the bus","Pass on the left with caution"],e:"On an undivided road, traffic both ways stops at least 20 feet from the bus. Only a physical median or barrier exempts oncoming traffic.",h:"The word 'undivided' is the key."},
+ {q:"Your car begins to skid. What do you do?",a:"Ease off the brake and steer where you want the car to go",w:["Brake hard and steer the opposite direction","Accelerate to regain traction","Pull the parking brake"],e:"Get off the brake and steer toward your intended path. Hard braking makes a skid worse.",h:"Look where you want to go."},
+ {q:"You're 16. When may you legally use a cell phone while driving in Utah?",a:"Only to report a genuine emergency",w:["Anytime, as long as it's hands-free","For calls but not texts","While stopped at a red light"],e:"Utah drivers under 18 may not use a cell phone at all while driving except for an emergency.",h:"Stricter than the adult rule."},
+ {q:"How far from a fire hydrant must you park?",a:"15 feet",w:["5 feet","10 feet","25 feet"],e:"15 feet from a hydrant, 20 feet from a crosswalk, 30 feet from a stop sign or signal.",h:"Between 10 and 20."},
+ {q:"A pentagon-shaped sign means:",a:"School zone or school crossing",w:["Railroad crossing ahead","Yield","No passing zone"],e:"Five sides means school. A circle means railroad crossing; an upside-down triangle means yield.",h:"Five sides, like a little schoolhouse."},
+ {q:"A flashing yellow traffic light means:",a:"Slow down and proceed with caution",w:["Stop completely, then proceed","Treat it as a four-way stop","Speed up to clear the intersection"],e:"Flashing yellow means proceed carefully. Flashing red is the one you treat as a stop sign.",h:"Flashing red and flashing yellow are different."},
+ {q:"When are headlights required in Utah?",a:"From a half hour after sunset to a half hour before sunrise, and whenever visibility is under 1,000 feet",w:["Only after full dark","Only on highways and freeways","Whenever you personally feel it's needed"],e:"The half-hour rule plus the 1,000-foot visibility rule. Rule of thumb: wipers on means headlights on.",h:"There's a time window and a distance."},
+ {q:"You're entering a roundabout. What's correct?",a:"Yield to traffic already in the circle and travel counterclockwise",w:["Traffic in the circle yields to you","Always come to a complete stop first","Travel clockwise to exit sooner"],e:"Cars already circulating have the right of way. Enter on a gap, go counterclockwise.",h:"Who was there first?"},
+ {q:"Safe following distance in good conditions:",a:"Three seconds",w:["One second","Two seconds","One car length per 10 mph"],e:"Three seconds minimum, more in rain, snow, fog, or at night. Count after the car ahead passes a fixed object.",h:"More than two."},
+ {q:"Utah's blood alcohol limit for drivers 21 and over is:",a:"0.05",w:["0.08","0.10","0.02"],e:"Utah has the lowest limit in the country at 0.05. Drivers under 21 can be charged with any measurable amount.",h:"Lower than every other state."},
+ {q:"You're under 21 and have been drinking. What BAC can get you charged?",a:"Any measurable amount of alcohol",w:["0.05 or above","0.08 or above","0.02 or above only after midnight"],e:"Utah's not-a-drop law: under 21, any measurable alcohol means a violation.",h:"There's no safe number."},
+ {q:"You refuse a chemical test after a lawful DUI arrest. What happens?",a:"Your license is revoked, even if you were never convicted of DUI",w:["Nothing, since refusal is your right","A small fine only","The officer must let you go"],e:"Utah's implied consent law: driving means you've already agreed to testing. Refusal triggers an 18-month revocation for a first refusal.",h:"You agreed to this when you got the license."},
+ {q:"Unless posted otherwise, the speed limit in a residential or school zone is:",a:"25 mph",w:["15 mph","30 mph","35 mph"],e:"25 mph is the default in residential districts and school zones unless a sign says otherwise.",h:"A quarter of 100."},
+ {q:"How far from a railroad crossing must you stop when the gates are down or a train is approaching?",a:"Between 15 and 50 feet",w:["Between 5 and 15 feet","At least 100 feet","Anywhere behind the crossbuck"],e:"Stop no closer than 15 feet and no farther than 50 feet from the nearest rail.",h:"Two numbers, both under 60."},
+ {q:"An emergency vehicle approaches with lights and siren. You should:",a:"Pull over to the right and stop until it passes",w:["Speed up to get out of the way","Stop immediately in your lane","Pull to the left shoulder"],e:"Pull right, stop, and stay stopped until it's past. Never stop in an intersection.",h:"Right side, then stop."},
+ {q:"Utah's Move Over law requires you to:",a:"Change lanes away from a stopped emergency, tow, or maintenance vehicle, or slow down if you can't",w:["Honk as you pass","Stop completely until the scene clears","Turn on hazard lights and continue at speed"],e:"Move over a lane if it's safe. If you can't, slow well below the limit as you pass.",h:"It's in the name of the law."},
+ {q:"A solid yellow line on your side of the center line means:",a:"You may not pass",w:["You may pass when clear","Passing allowed only during daylight","The lane is ending"],e:"Solid yellow on your side means no passing. Broken yellow on your side means passing is allowed when it's safe.",h:"Solid means don't."},
+ {q:"A double solid white line means:",a:"Crossing or changing lanes is prohibited",w:["Passing is allowed with caution","Traffic flows in opposite directions","The road ends ahead"],e:"Double solid white lines separate lanes going the same direction and may not be crossed.",h:"Double solid is the strictest marking."},
+ {q:"An orange sign in a work zone means:",a:"Construction or maintenance ahead",w:["Recreational area","Motorist services","A permanent warning"],e:"Orange always means a temporary work zone. Fines are typically doubled there.",h:"Think of the cones."},
+ {q:"A blue highway sign indicates:",a:"Motorist services like food, gas, and lodging",w:["A recreation area","A construction detour","Distance to the next city"],e:"Blue is services, brown is parks and recreation, green is guidance and distance.",h:"Not parks."},
+ {q:"A diamond-shaped yellow sign means:",a:"A general warning about conditions ahead",w:["A regulation you must obey","A destination or exit","Road work"],e:"Yellow diamonds warn: curve, deer, merge, dip. Orange diamonds mean the same in a work zone.",h:"It warns, it doesn't command."},
+ {q:"You're passing a bicyclist on a Utah road. You must leave at least:",a:"3 feet of clearance",w:["1 foot","2 feet","6 feet"],e:"Utah law requires a minimum of 3 feet when overtaking a bicycle.",h:"Same as a yardstick."},
+ {q:"A pedestrian with a white cane or guide dog starts to cross. You must:",a:"Stop and yield completely",w:["Sound your horn to alert them","Proceed slowly around them","Continue if you have a green light"],e:"You must always yield fully to a pedestrian who is blind or visually impaired.",h:"There's no exception here."},
+ {q:"When must you yield to a pedestrian in a crosswalk?",a:"Whether the crosswalk is marked or unmarked",w:["Only at marked crosswalks","Only when the walk signal is lit","Only in school zones"],e:"Every intersection has a crosswalk whether it's painted or not, and pedestrians in it have the right of way.",h:"Paint isn't what creates the crosswalk."},
+ {q:"How long before a turn must you signal in Utah?",a:"Continuously for at least the last two seconds",w:["At least 10 seconds","Only if another car is nearby","As you begin the turn"],e:"Utah requires signaling continuously for at least two seconds before turning or changing lanes.",h:"Just a couple of seconds."},
+ {q:"You want to change lanes. Before you move, you should:",a:"Signal, check mirrors, and look over your shoulder at the blind spot",w:["Signal and go","Check only your mirrors","Tap the brakes to warn others"],e:"Mirrors don't cover the blind spot. A head check is the step people skip and it's on the test.",h:"Mirrors alone aren't enough."},
+ {q:"You're driving in dense fog. You should use:",a:"Low beams",w:["High beams","Hazard lights while moving","Parking lights only"],e:"High beams reflect off fog and make visibility worse. Low beams, slow down, increase following distance.",h:"Brighter is not better here."},
+ {q:"An oncoming car refuses to dim its high beams. You should:",a:"Look toward the right edge of your lane",w:["Flash your high beams back","Stare at their headlights to track them","Close one eye"],e:"Glancing at the right edge line keeps you oriented without being blinded.",h:"Look away from the light, but not off the road."},
+ {q:"Your car starts to hydroplane. You should:",a:"Ease off the gas and keep the wheel steady",w:["Brake firmly","Accelerate through it","Steer sharply toward the shoulder"],e:"Don't brake or turn hard. Ease off the accelerator and let the tires reconnect with the pavement.",h:"Do less, not more."},
+ {q:"You have anti-lock brakes and need to stop hard. You should:",a:"Press the brake firmly and hold it",w:["Pump the brakes rapidly","Press and release repeatedly","Use the parking brake instead"],e:"ABS pumps for you. The pedal will shudder, which is normal. Keep steady pressure and steer.",h:"Don't do the pumping yourself."},
+ {q:"A front tire blows out at highway speed. First response:",a:"Grip the wheel firmly and ease off the gas",w:["Brake hard immediately","Steer sharply to the shoulder","Turn off the engine"],e:"Hold the wheel, let the car slow gradually, then pull off once you're under control.",h:"Braking hard is the wrong instinct."},
+ {q:"Parking downhill with a curb, your front wheels should be turned:",a:"Toward the curb",w:["Away from the curb","Straight ahead","It doesn't matter with a parking brake"],e:"Downhill, wheels toward the curb. Uphill with a curb, wheels away. No curb at all, wheels toward the shoulder.",h:"Gravity should roll the car into the curb."},
+ {q:"How far from a stop sign or traffic signal must you park?",a:"30 feet",w:["10 feet","15 feet","20 feet"],e:"30 feet from a stop sign or signal, 20 from a crosswalk, 15 from a hydrant.",h:"The biggest of the three parking distances."},
+ {q:"Turning right on red in Utah is:",a:"Allowed after a complete stop, unless a sign prohibits it",w:["Never allowed","Allowed without stopping if clear","Allowed only between 6 a.m. and 10 p.m."],e:"Full stop, yield to pedestrians and cross traffic, then turn unless posted otherwise.",h:"There's one thing you must do first."},
+ {q:"You're making a left turn at a green light with no arrow. You must:",a:"Yield to oncoming traffic and pedestrians",w:["Turn immediately, since green gives you the right of way","Wait for the light to turn yellow","Honk and proceed"],e:"A solid green means go if clear, but oncoming traffic has the right of way over your left turn.",h:"Green isn't a promise."},
+ {q:"You're entering a highway from a driveway or parking lot. You must:",a:"Yield to all traffic and pedestrians on the roadway",w:["Merge at the posted speed limit","Take the right of way if there's a gap","Stop only if a car is within 100 feet"],e:"Traffic already on the road always has the right of way over a vehicle entering from a private drive.",h:"You're the one joining."},
+ {q:"On a freeway on-ramp, you should:",a:"Use the acceleration lane to match the speed of traffic before merging",w:["Stop at the end of the ramp and wait for a gap","Merge at whatever speed you're at","Force your way in and let others adjust"],e:"Stopping on a ramp is dangerous. Get to traffic speed, signal, find a gap, merge smoothly.",h:"The ramp has a job."},
+ {q:"With a Utah learner permit, who must be in the front passenger seat?",a:"A licensed driver at least 21 years old, or your parent, guardian, or approved instructor",w:["Anyone with a valid license","Any adult over 18","Nobody is required after the first month"],e:"You can never drive alone on a learner permit. The supervising driver has to be beside you, not in the back.",h:"Front seat, and there's an age minimum."},
+ {q:"During the first six months of a Utah provisional license, who can ride with you?",a:"Immediate family members only",w:["Up to three friends","Anyone during daylight hours","Anyone as long as everyone is belted"],e:"For the first six months, minors may only carry immediate family unless a licensed parent or guardian is in the car.",h:"Family."},
+ {q:"Utah restricts drivers under 18 from driving between:",a:"Midnight and 5 a.m.",w:["10 p.m. and 6 a.m.","11 p.m. and 4 a.m.","1 a.m. and 5 a.m."],e:"Exceptions include emergencies, work, and a licensed parent or guardian in the car.",h:"Starts exactly at 12."},
+ {q:"How long must a 16- or 17-year-old hold a learner permit before getting a license?",a:"At least six months",w:["30 days","90 days","One year"],e:"Under 19 you also have to complete an approved driver education course.",h:"Half a year."},
+ {q:"Utah requires teen drivers to log how many hours of supervised practice?",a:"40 hours, including 10 at night",w:["20 hours, including 5 at night","60 hours, including 20 at night","No specific number"],e:"40 total, 10 of them after dark, certified by your parent or guardian.",h:"A full work week."},
+ {q:"Utah's seat belt law is a primary law, which means:",a:"An officer can pull you over for the belt violation alone",w:["You can only be ticketed if stopped for something else","It only applies to the driver","It only applies on freeways"],e:"Primary enforcement means the belt itself is enough reason for a stop. All occupants must be restrained.",h:"No other violation needed."},
+ {q:"A child must be in a car seat or booster until:",a:"Age 8 or 57 inches tall",w:["Age 5 or 40 inches","Age 6 or 50 inches","Age 10 or 60 inches"],e:"Utah requires a child restraint until the child turns 8 or reaches 57 inches, whichever comes first.",h:"Just under five feet."},
+ {q:"A pennant-shaped sign on the left side of the road means:",a:"No passing zone",w:["School crossing","Divided highway ahead","Merging traffic"],e:"The long yellow triangle pointing right, posted on the left shoulder, marks the start of a no-passing zone.",h:"It's on the left for a reason."},
+ {q:"A white rectangular sign is:",a:"A regulatory sign stating a law you must obey",w:["A warning about conditions ahead","A guide to services","Optional guidance"],e:"White signs regulate: speed limits, turn restrictions, one way, do not enter.",h:"It's a rule, not a warning."},
+ {q:"You may not pass another vehicle within:",a:"100 feet of an intersection, railroad crossing, bridge, or tunnel",w:["50 feet of a driveway","500 feet of any curve","300 feet of a school"],e:"Passing is also prohibited when you'd have to exceed the speed limit to complete it.",h:"Three digits."},
+ {q:"You're drowsy on a long drive. The only real fix is:",a:"Pull over somewhere safe and sleep",w:["Turn the radio up loud","Open the windows for cold air","Drink coffee and keep going"],e:"Caffeine, noise, and cold air delay sleep by minutes at best. Drowsy driving impairs you like alcohol does.",h:"There's no trick that actually works."},
+ {q:"Utah drivers under 21 face license suspension after accumulating:",a:"70 points in three years",w:["100 points in three years","200 points in three years","150 points in two years"],e:"The threshold for drivers 21 and over is 200 points. Under 21, it's 70.",h:"Much lower than the adult number."},
+ {q:"Texting while driving in Utah is:",a:"Illegal for all drivers regardless of age",w:["Legal at stoplights","Legal for drivers over 18","Only a violation if it causes a crash"],e:"Manipulating a device to text, email, or browse is prohibited for everyone.",h:"No age exception."},
+ {q:"On a road with a center left-turn lane (two-way), you may:",a:"Use it only to make or prepare for a left turn",w:["Use it to pass slower traffic","Drive in it for up to 500 feet","Use it as a merge lane at any length"],e:"It's a shared turn lane, not a travel lane or a passing lane.",h:"Its name tells you its only purpose."},
+ {q:"You approach a curve. The safest technique is:",a:"Slow down before you enter it, then accelerate gently through",w:["Brake in the middle of the curve","Coast through in neutral","Maintain speed and steer harder"],e:"Braking mid-curve upsets the car's balance. Do your slowing on the straight part.",h:"Timing matters more than speed."},
+ {q:"Driving at night, you should not 'overdrive your headlights.' That means:",a:"Never drive so fast that you can't stop within the distance you can see",w:["Never use high beams in town","Never exceed 45 mph after dark","Always dim your dash lights"],e:"Low beams show about 350 feet. If your stopping distance is longer than your sight distance, you're overdriving them.",h:"It's about stopping distance."},
+ {q:"You must dim your high beams when you are within:",a:"500 feet of an oncoming vehicle or 300 feet behind another vehicle",w:["100 feet in either case","1,000 feet in either case","Only when the other driver flashes at you"],e:"Dim early. High beams in a mirror are just as blinding as head-on.",h:"Two different numbers, oncoming is the larger."},
+ {q:"An open container of alcohol in the passenger area of your car is:",a:"Illegal, even if you haven't been drinking",w:["Legal if the driver is sober","Legal if it's stored in the back seat","Legal for passengers over 21"],e:"Open containers must be in the trunk or a place not readily accessible.",h:"Where it is matters, not who drank it."},
+ {q:"Hazard lights should be used when:",a:"Your vehicle is disabled or creating a hazard for other traffic",w:["Driving through heavy rain","Double-parking briefly","Any time you're going slower than traffic"],e:"They signal a problem, not permission to stop or drive oddly.",h:"They mean something is wrong."},
+ {q:"A steady yellow light means:",a:"Stop if you can do so safely, because the light is about to turn red",w:["Speed up to clear the intersection","Proceed if no cross traffic is visible","Stop only if a pedestrian is present"],e:"Yellow is a warning to stop, not an invitation to accelerate.",h:"It's a warning, not a countdown."},
+ {q:"You're first in line at a green light and traffic is backed up on the other side of the intersection. You should:",a:"Wait behind the line until there's room to fully clear the intersection",w:["Enter anyway, since you have a green","Enter halfway and wait","Turn right instead"],e:"Blocking an intersection is a violation and a common test question.",h:"Green doesn't mean go if you'd get stuck."},
+ {q:"When following a large truck, you should stay back farther because:",a:"The truck driver can't see you in their large blind spots and needs more stopping distance",w:["Trucks accelerate faster than cars","It's a courtesy, not a safety issue","Trucks are required to brake suddenly"],e:"If you can't see the truck's mirrors, the driver can't see you.",h:"Think about what the driver can see."}
+];
+
+/* ============ FLASHCARDS ============ */
+const CARDS = [
+ ["Utah BAC limit, 21 and over","0.05 — the lowest in the country"],
+ ["Utah BAC limit, under 21","Any measurable amount (not-a-drop law)"],
+ ["Refusing a chemical test","License revoked — 18 months for a first refusal, even without a DUI conviction"],
+ ["Passing score on the knowledge test","40 of 50 questions (80%). You can miss 10."],
+ ["Default speed, residential and school zones","25 mph unless posted otherwise"],
+ ["Safe following distance","3 seconds; more in rain, snow, fog, or darkness"],
+ ["Stopping for a school bus","At least 20 feet, both directions, until the red lights stop flashing (unless a median divides the road)"],
+ ["Railroad crossing stop distance","Between 15 and 50 feet from the nearest rail"],
+ ["Parking: fire hydrant","15 feet"],
+ ["Parking: crosswalk","20 feet"],
+ ["Parking: stop sign or signal","30 feet"],
+ ["Passing a bicyclist","Leave at least 3 feet of clearance"],
+ ["Signal before turning","Continuously for at least 2 seconds"],
+ ["Dim your high beams","Within 500 feet of an oncoming car; within 300 feet behind another car"],
+ ["Headlights required","Half hour after sunset to half hour before sunrise, and any time visibility is under 1,000 feet"],
+ ["No passing within","100 feet of an intersection, railroad crossing, bridge, or tunnel"],
+ ["Four-way stop, arriving together","The car on the right goes first"],
+ ["Left turn on a solid green","Yield to oncoming traffic and pedestrians"],
+ ["Right turn on red","Allowed after a complete stop unless a sign prohibits it"],
+ ["Roundabout","Yield to traffic already in it; travel counterclockwise"],
+ ["Entering from a driveway or lot","Yield to everything already on the road"],
+ ["Freeway on-ramp","Use the acceleration lane to reach traffic speed, then merge"],
+ ["Center two-way left-turn lane","Only for making or preparing a left turn — never for passing"],
+ ["Flashing red light","Treat it as a stop sign"],
+ ["Flashing yellow light","Slow down, proceed with caution"],
+ ["Steady yellow light","Stop if you safely can — red is next"],
+ ["Solid yellow line on your side","No passing"],
+ ["Double solid white line","No lane changes"],
+ ["Octagon","Stop"],
+ ["Upside-down triangle","Yield"],
+ ["Pentagon","School zone or crossing"],
+ ["Diamond","Warning about what's ahead"],
+ ["Pennant on the left shoulder","No passing zone"],
+ ["Circle sign","Railroad crossing ahead"],
+ ["Sign colors","Red = stop/prohibit · Yellow = warn · Orange = work zone · Green = guide · Blue = services · Brown = recreation · White = law"],
+ ["Skid recovery","Off the brake, steer where you want to go"],
+ ["Hydroplaning","Ease off the gas, hold the wheel steady, don't brake"],
+ ["Anti-lock brakes","Press firmly and hold — don't pump"],
+ ["Tire blowout","Grip the wheel, ease off the gas, don't brake hard"],
+ ["Heavy fog","Low beams, slow down, more following distance"],
+ ["Blinding oncoming headlights","Look toward the right edge of your lane"],
+ ["Drowsy driving","Pull over and sleep — coffee and cold air don't fix it"],
+ ["Parking downhill with a curb","Front wheels turned toward the curb"],
+ ["Parking uphill with a curb","Front wheels turned away from the curb"],
+ ["Emergency vehicle approaching","Pull right and stop until it passes"],
+ ["Move Over law","Change lanes away from a stopped emergency, tow, or maintenance vehicle; slow down if you can't"],
+ ["Cell phone, under 18","Prohibited entirely except to report an emergency"],
+ ["Texting","Illegal for every driver, every age"],
+ ["Seat belts in Utah","Primary law — the violation alone is enough for a traffic stop"],
+ ["Child restraint","Required until age 8 or 57 inches tall"],
+ ["Learner permit supervision","A licensed driver 21+ (or parent, guardian, approved instructor) in the front passenger seat"],
+ ["Permit holding period, age 16–17","At least six months, plus driver education"],
+ ["Required practice hours","40 hours supervised, including 10 at night"],
+ ["First six months of a provisional license","Immediate family passengers only"],
+ ["Night restriction, under 18","No driving midnight to 5 a.m. (work, emergency, or licensed parent excepted)"],
+ ["Point suspension threshold, under 21","70 points in three years (200 for 21 and over)"],
+ ["Open container","Illegal in the passenger area regardless of who was drinking"],
+ ["Overdriving your headlights","Going faster than your ability to stop within the distance you can see"],
+ ["Blocked intersection","Don't enter on green unless you can fully clear the other side"],
+ ["Following a large truck","If you can't see the driver's mirrors, they can't see you"]
+];
+
+/* ============ engine ============ */
+const LENGTHS=[10,20,50];
+let len=20, deck=[], idx=0, score=0, missedIds=[], pool=null;
+
+function shuffle(a){const x=a.slice();for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]];}return x;}
+
+function renderLengths(){
+  const el=document.getElementById('lengths');
+  el.innerHTML='';
+  LENGTHS.forEach(n=>{
+    const b=document.createElement('button');
+    b.className='len';
+    b.setAttribute('aria-pressed', n===len);
+    b.innerHTML=n+' questions<small>'+(n===50?'full-length, like the real test':n===20?'good for a quick round':'fast check')+'</small>';
+    b.onclick=()=>{len=n;renderLengths();};
+    el.appendChild(b);
+  });
+}
+
+function buildDeck(source){
+  const src = source || BANK;
+  const picked = shuffle(src).slice(0, Math.min(len, src.length));
+  return picked.map(item=>{
+    const opts = shuffle([{t:item.a,ok:true}, ...item.w.map(t=>({t,ok:false}))]);
+    return {...item, opts, id: BANK.indexOf(item)};
+  });
+}
+
+function startQuiz(){
+  deck = buildDeck(pool); pool=null;
+  idx=0; score=0; missedIds=[];
+  document.getElementById('setup').hidden=true;
+  document.getElementById('results').hidden=true;
+  document.getElementById('quiz').hidden=false;
+  renderQ();
+}
+
+function retryMissed(){
+  if(!missedIds.length) return;
+  pool = missedIds.map(i=>BANK[i]);
+  len = pool.length;
+  startQuiz();
+}
+
+function renderQ(){
+  const item=deck[idx];
+  document.getElementById('qtext').textContent=item.q;
+  document.getElementById('counter').textContent='Question '+(idx+1)+' of '+deck.length;
+  document.getElementById('running').textContent=score+' correct so far';
+  document.getElementById('bar').style.width=((idx)/deck.length*100)+'%';
+  document.getElementById('feedback').hidden=true;
+  document.getElementById('next').hidden=true;
+  document.getElementById('hintbtn').hidden=false;
+  document.getElementById('hinttext').hidden=true;
+
+  const box=document.getElementById('opts'); box.innerHTML='';
+  const letters=['A','B','C','D'];
+  item.opts.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML='<b>'+letters[i]+'</b><span>'+o.t+'</span>';
+    b.onclick=()=>answer(i,b);
+    box.appendChild(b);
+  });
+}
+
+function answer(i,btn){
+  const item=deck[idx];
+  const buttons=[...document.querySelectorAll('#opts .opt')];
+  buttons.forEach((b,j)=>{
+    b.disabled=true;
+    if(item.opts[j].ok) b.classList.add('correct');
+  });
+  const ok=item.opts[i].ok;
+  if(ok){score++;} else {btn.classList.add('chosen-wrong'); missedIds.push(item.id);}
+  const fb=document.getElementById('feedback');
+  fb.innerHTML='<strong>'+(ok?'Correct.':'Not this one.')+'</strong>'+item.e;
+  fb.hidden=false;
+  document.getElementById('hintbtn').hidden=true;
+  document.getElementById('hinttext').hidden=true;
+  document.getElementById('running').textContent=score+' correct so far';
+  const nx=document.getElementById('next');
+  nx.textContent = idx===deck.length-1 ? 'See results' : 'Next';
+  nx.hidden=false; nx.focus();
+}
+
+function showHint(){
+  document.getElementById('hinttext').textContent=deck[idx].h;
+  document.getElementById('hinttext').hidden=false;
+  document.getElementById('hintbtn').hidden=true;
+}
+
+function nextQ(){
+  if(idx<deck.length-1){idx++;renderQ();} else {finish();}
+}
+
+function finish(){
+  document.getElementById('quiz').hidden=true;
+  document.getElementById('results').hidden=false;
+  const pct=Math.round(score/deck.length*100);
+  document.getElementById('pct').textContent=pct+'%';
+  const v=document.getElementById('verdict');
+  v.textContent = pct>=80 ? 'Passing' : 'Below the passing line';
+  v.className='verdict '+(pct>=80?'pass':'fail');
+  document.getElementById('subline').textContent=score+' of '+deck.length+' correct. You need 80% at the DLD.';
+  document.getElementById('retryMissed').hidden = missedIds.length===0;
+
+  const m=document.getElementById('missed');
+  if(!missedIds.length){m.innerHTML='<h3>Nothing missed. Go take the real one.</h3>';return;}
+  let html='<h3>Review these '+missedIds.length+'</h3>';
+  missedIds.forEach(id=>{
+    const b=BANK[id];
+    html+='<div class="miss"><p>'+b.q+'</p><span><em>'+b.a+'</em> — '+b.e+'</span></div>';
+  });
+  m.innerHTML=html;
+}
+
+function reset(){
+  document.getElementById('quiz').hidden=true;
+  document.getElementById('results').hidden=true;
+  document.getElementById('setup').hidden=false;
+}
+
+/* ---------- tabs ---------- */
+function showTab(which){
+  const q=which==='quiz';
+  document.getElementById('view-quiz').hidden=!q;
+  document.getElementById('view-cards').hidden=q;
+  document.getElementById('tab-quiz').setAttribute('aria-selected',q);
+  document.getElementById('tab-cards').setAttribute('aria-selected',!q);
+}
+
+/* ---------- flashcards ---------- */
+let cardOrder=CARDS.slice();
+function renderDeck(){
+  const el=document.getElementById('deck'); el.innerHTML='';
+  cardOrder.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='card'; b.dataset.flipped='false';
+    b.innerHTML='<div class="front">'+c[0]+'</div><div class="back">'+c[1]+'</div><span class="tap">tap to flip</span>';
+    b.onclick=()=>{b.dataset.flipped = b.dataset.flipped==='true' ? 'false':'true';};
+    el.appendChild(b);
+  });
+}
+function shuffleDeck(){cardOrder=shuffle(CARDS);renderDeck();renderPrint();}
+function flipAll(){
+  const cards=[...document.querySelectorAll('.card')];
+  const anyDown=cards.some(c=>c.dataset.flipped==='false');
+  cards.forEach(c=>c.dataset.flipped=anyDown?'true':'false');
+}
+function renderPrint(){
+  let html='<h2 class="ptitle">Utah Permit Flashcards</h2><p class="pnote">Fold each card on the center dashed line so the answer is on the back, then cut along the outer dashes.</p>';
+  cardOrder.forEach(c=>{
+    html+='<div class="pcard"><div class="pq">'+c[0]+'</div><div class="pa">'+c[1]+'</div></div>';
+  });
+  document.getElementById('printSheet').innerHTML=html;
+}
+
+renderLengths();renderDeck();renderPrint();
+</script>
+</body>
+</html>
